@@ -1,0 +1,3 @@
+using HECUVoiceLab.Presets; namespace HECUVoiceLab.Dsp;
+// Expander/gate creates the clean silent gaps heard in old game dialogue clips.
+public sealed class NoiseGate { float env,gain=1,hold; Preset p=new(); float sr=48000; public bool IsOpen=>gain>.5f; public void Configure(float sampleRate, Preset preset){sr=sampleRate;p=preset;} public float Process(float x){ var level=20*MathF.Log10(MathF.Abs(x)+1e-6f); bool open=level>p.GateThresholdDb; if(open) hold=p.GateHoldMs*sr/1000; else hold=Math.Max(0,hold-1); float target=(open||hold>0)?1:MathF.Pow(1-Math.Clamp(p.GateHardness/100,0,1),2); float rel=MathF.Exp(-1/(sr*Math.Max(20,p.GateReleaseMs)/1000)); gain=target>gain?target:gain*rel+target*(1-rel); env=gain; return x*env; } }

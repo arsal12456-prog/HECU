@@ -1,0 +1,3 @@
+using HECUVoiceLab.Presets; namespace HECUVoiceLab.Dsp;
+// Feed-forward compressor keeps active speech dense around the measured tactical-radio loudness.
+public sealed class Compressor { float env; Preset p=new(); float sr=48000; static float DbToLin(float db)=>MathF.Pow(10,db/20); public void Configure(float sampleRate, Preset preset){sr=sampleRate;p=preset;} public float Process(float x){ var lvl=MathF.Abs(x); var a=MathF.Exp(-1/(sr*p.CompressorAttackMs/1000)); var r=MathF.Exp(-1/(sr*p.CompressorReleaseMs/1000)); env = lvl>env ? a*env+(1-a)*lvl : r*env+(1-r)*lvl; var db=20*MathF.Log10(env+1e-6f); var over=db-p.CompressorThresholdDb; var gr=over>0 ? -(over*(1-1/p.CompressorRatio)) : 0; return x*DbToLin(gr+p.MakeupGainDb); } }

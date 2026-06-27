@@ -1,0 +1,3 @@
+using HECUVoiceLab.Presets; namespace HECUVoiceLab.Dsp;
+// Adds subtle phrase-edge bite/tight endings without turning speech into glitch stutter.
+public sealed class TacticalChop { bool wasActive; int sinceStart; Preset p=new(); public bool EdgeEvent{get;private set;} public void Configure(float sr, Preset preset){p=preset;} public float Process(float x,bool active){EdgeEvent=false; if(active&&!wasActive){sinceStart=0;EdgeEvent=true;} if(!active&&wasActive) EdgeEvent=true; wasActive=active; float y=x; if(active && sinceStart++<120) y*=1+p.TransientBite/100*.25f; if(!active) y*=1-p.EndCutTightness/100*.5f; return y; } }
