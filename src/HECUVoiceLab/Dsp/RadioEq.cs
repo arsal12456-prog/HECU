@@ -1,0 +1,4 @@
+using HECUVoiceLab.Presets;
+namespace HECUVoiceLab.Dsp;
+// Shapes the mic into the boxy, mid-heavy helmet/radio band of the HECU-style target.
+public sealed class RadioEq { readonly BiquadFilter hp=new(), mud=new(), lowMid=new(), body=new(), pres=new(), edge=new(), lp1=new(), lp2=new(); public void Configure(float sr, Preset p){hp.Set(BiquadType.HighPass,sr,p.HighPassHz,.707); mud.Set(BiquadType.Peaking,sr,220,.8,-2); lowMid.Set(BiquadType.Peaking,sr,550,.9,p.HelmetLowMidDb); body.Set(BiquadType.Peaking,sr,1250,1,2); pres.Set(BiquadType.Peaking,sr,2850,1.1,p.RadioPresenceDb); edge.Set(BiquadType.Peaking,sr,4200,1.4,p.HarshEdgeDb); lp1.Set(BiquadType.LowPass,sr,p.LowPassHz,.707); lp2.Set(BiquadType.LowPass,sr,p.LowPassHz,.707);} public float Process(float x)=>lp2.Process(lp1.Process(edge.Process(pres.Process(body.Process(lowMid.Process(mud.Process(hp.Process(x)))))))); }
